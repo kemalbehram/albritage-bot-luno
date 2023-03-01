@@ -1,0 +1,6 @@
+get fees from api : optimize profit
+sopport all coins : optimize profit
+make single ticker function, : optimize performance
+consider JSONOBJECT return typs to api calls : optimize code
+
+save state, exchange coin, 3 booleans for each function
