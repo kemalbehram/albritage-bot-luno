@@ -5,7 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 public class Configure {
+    public static String BI_API_KEY = "CafxrsHFB9MDW47klYqaT8u9tP9zHHR3WSEysbGwp7khyBFmaKKW2BHYimDdJ5NG";
+    public static String BI_SECRET_KEY = "SrMabc2XHYO3HfA7VqiWQXXGQV3ztKk8U27VIa5hihKdQdSYTsmMOakF8cE9vxUw";
 
+    public static String LUNO_API_KEY = "c7qb687kqhu2h";
+    public static String LUNO_SECRET_KEY = "OpOHS_LJbI5FH_24YP0bxPqP7rNXk4X6Y4oytZ4sVT4";
 
     public static Double SLIPPAGE_PROCENT = 2.0;
     public static List<String> BlockchainNetworks = new ArrayList<String>(List.of(

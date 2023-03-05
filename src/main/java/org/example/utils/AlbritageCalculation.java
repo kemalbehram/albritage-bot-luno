@@ -35,14 +35,24 @@ public class AlbritageCalculation {
             ).multiply(endCoin.getPrice());
 
             BigDecimal newTradeAmount = (avaibleAmount.compareTo(tradeAmount) > 0) ? tradeAmount : avaibleAmount;
+            MainViewModel.setTradeAmount(newTradeAmount);
 
+            myLog.info("tradeAmount : "+newTradeAmount.toString());
 
             BigDecimal buyQuantityInklFees = minusProcentage(buyFeesProcentage, newTradeAmount.divide(startCoin.getPrice(), RoundingMode.HALF_EVEN))
                     .subtract(startBlockchain.getFee());
 
             BigDecimal sellAmountInklFees = minusProcentage(sellFeesProcentage, buyQuantityInklFees.multiply(endCoin.getPrice()));
 
-            return sellAmountInklFees.subtract(newTradeAmount);
+            if (currencyConverter(
+                    endCoin.getSymbol().split("_")[1],
+                    startCoin.getSymbol().split("_")[1],
+                    buyQuantityInklFees.multiply(endCoin.getPrice())
+            ).compareTo(new BigDecimal("0.0")) <= 0.0) {
+                return new BigDecimal("0.0");
+            } else {
+                return sellAmountInklFees.subtract(newTradeAmount);
+            }
         } catch (Exception e) {
             myLog.info(e.toString());
             return new BigDecimal("0.0");
@@ -92,7 +102,7 @@ public class AlbritageCalculation {
             MainStateModel.ExchangeData.CoinData currency = state().getExchangeData().get(ExchangeEnums.BINANCE).getCoinsData().get(currentCurrency+"_"+newCurrency);
             return amount.multiply(currency.getPrice());
         }
-        return amount;
+        return new BigDecimal("0.0");
     }
 
     private static BigDecimal minusProcentage(

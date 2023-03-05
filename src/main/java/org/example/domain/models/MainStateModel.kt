@@ -7,6 +7,7 @@ import java.math.BigDecimal
 data class MainStateModel(
         val currentCoin: String,
         val endCoin: String,
+        val tradeAmount: BigDecimal,
         val currentBlockchain: ExchangeData.CoinData.Blockchain,
         val statExchange: ExchangeEnums,
         val endExchange: ExchangeEnums,

@@ -9,6 +9,8 @@ import org.example.exchanges.binance.model.OrderModel;
 import org.example.exchanges.binance.model.WithdrawHistoryModel;
 import org.example.exchanges.binance.model.WithdrawModel;
 import org.example.exchanges.binance.repository.BinanceRepository;
+import org.example.exchanges.luno.dto.PostMarketOrderDto;
+import org.example.exchanges.luno.repository.LunoRepository;
 import org.example.utils.AlbritageCalculation;
 import org.example.utils.FindUsdtAmount;
 import org.example.utils.RoundToMinQty;
@@ -21,7 +23,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class MainViewModel {
-    private static MainStateModel _state = new MainStateModel("","", new MainStateModel.ExchangeData.CoinData.Blockchain("","","",new BigDecimal("100.0"),100.0), ExchangeEnums.BINANCE,ExchangeEnums.BINANCE,"","","", ExchangeStates.FAILED,ExchangeStates.FAILED,ExchangeStates.FAILED, Map.of());
+    private static MainStateModel _state = new MainStateModel("","", new BigDecimal("0.0"), new MainStateModel.ExchangeData.CoinData.Blockchain("","","",new BigDecimal("100.0"),100.0), ExchangeEnums.BINANCE,ExchangeEnums.BINANCE,"","","", ExchangeStates.FAILED,ExchangeStates.FAILED,ExchangeStates.FAILED, Map.of());
     public static MainStateModel state() {
         return _state;
     }
@@ -34,9 +36,28 @@ public class MainViewModel {
         _state = _state.copy(
                 currentCoin,
                 endCoin,
+                _state.getTradeAmount(),
                 _state.getCurrentBlockchain(),
                 startExchange,
                 endExchange,
+                _state.getStatExchangeTradeId(),
+                _state.getEndExchangeTradeId(),
+                _state.getStatExchangeWithdrawId(),
+                _state.getStatExchangeTradeState(),
+                _state.getEndExchangeTradeState(),
+                _state.getStatExchangeWithdrawState(),
+                _state.getExchangeData()
+        );
+    }
+
+    public static void setTradeAmount(BigDecimal amount) {
+        _state = _state.copy(
+                _state.getCurrentCoin(),
+                _state.getEndCoin(),
+                amount,
+                _state.getCurrentBlockchain(),
+                _state.getStatExchange(),
+                _state.getEndExchange(),
                 _state.getStatExchangeTradeId(),
                 _state.getEndExchangeTradeId(),
                 _state.getStatExchangeWithdrawId(),
@@ -61,6 +82,7 @@ public class MainViewModel {
         _state = _state.copy(
                 _state.getCurrentCoin(),
                 _state.getEndCoin(),
+                _state.getTradeAmount(),
                 _state.getCurrentBlockchain(),
                 _state.getStatExchange(),
                 _state.getEndExchange(),
@@ -216,6 +238,7 @@ public class MainViewModel {
                     _state = _state.copy(
                             _state.getCurrentCoin(),
                             _state.getEndCoin(),
+                            _state.getTradeAmount(),
                             _state.getCurrentBlockchain(),
                             _state.getStatExchange(),
                             _state.getEndExchange(),
@@ -244,6 +267,7 @@ public class MainViewModel {
                     _state = _state.copy(
                             _state.getCurrentCoin(),
                             _state.getEndCoin(),
+                            _state.getTradeAmount(),
                             _state.getCurrentBlockchain(),
                             _state.getStatExchange(),
                             _state.getEndExchange(),
@@ -273,6 +297,7 @@ public class MainViewModel {
                     _state = _state.copy(
                             _state.getCurrentCoin(),
                             _state.getEndCoin(),
+                            _state.getTradeAmount(),
                             _state.getCurrentBlockchain(),
                             _state.getStatExchange(),
                             _state.getEndExchange(),
@@ -303,6 +328,7 @@ public class MainViewModel {
                     _state = _state.copy(
                             _state.getCurrentCoin(),
                             _state.getEndCoin(),
+                            _state.getTradeAmount(),
                             _state.getCurrentBlockchain(),
                             _state.getStatExchange(),
                             _state.getEndExchange(),
@@ -370,6 +396,7 @@ public class MainViewModel {
             _state = _state.copy(
                     _state.getCurrentCoin(),
                     _state.getEndCoin(),
+                    _state.getTradeAmount(),
                     endBlockchain,
                     _state.getStatExchange(),
                     _state.getEndExchange(),
@@ -399,7 +426,6 @@ public class MainViewModel {
                 .get(coin.getSymbol())
                 .getOrderBook();
 
-        System.out.println(orderBook.getBids());
 
         BigDecimal output = new BigDecimal("0");
 
@@ -420,41 +446,73 @@ public class MainViewModel {
                 .getCoinsData()
                 .get(state().getCurrentCoin());
 
-        BigDecimal usdtAmount = FindUsdtAmount.getUsdtAmount(state().getStatExchange());
+        BigDecimal usdtAmount = state().getTradeAmount();
 
-        if (usdtAmount != null) {
-            switch(state().getStatExchange()) {
-                case BINANCE -> {
-                    OrderModel tradeId = BinanceRepository.buyOrder(
-                            state().getCurrentCoin(),
-                            RoundToMinQty.roundToMinQty(
-                                    usdtAmount.subtract(new BigDecimal("1")),
-                                    state().getCurrentCoin(),
-                                    state().getStatExchange()
-                            ).divide(currentCoin.getPrice(), RoundingMode.HALF_EVEN)
+        switch (state().getStatExchange()) {
+            case BINANCE -> {
+                OrderModel tradeId = BinanceRepository.buyOrder(
+                        state().getCurrentCoin(),
+                        RoundToMinQty.roundToMinQty(
+                                usdtAmount.subtract(new BigDecimal("1")),
+                                state().getCurrentCoin(),
+                                state().getStatExchange()
+                        ).divide(currentCoin.getPrice(), RoundingMode.HALF_EVEN)
+                );
+                System.out.println("usdtAmount " + usdtAmount);
+                System.out.println("RoundToMinQty Bi  " + RoundToMinQty.roundToMinQty(
+                        usdtAmount,
+                        state().getCurrentCoin(),
+                        state().getStatExchange()
+                ).divide(currentCoin.getPrice(), RoundingMode.HALF_EVEN));
+                if (tradeId != null) {
+                    _state = _state.copy(
+                            _state.getCurrentCoin(),
+                            _state.getEndCoin(),
+                            _state.getTradeAmount(),
+                            _state.getCurrentBlockchain(),
+                            _state.getStatExchange(),
+                            _state.getEndExchange(),
+                            String.valueOf(tradeId.getId()),
+                            _state.getEndExchangeTradeId(),
+                            _state.getStatExchangeWithdrawId(),
+                            _state.getStatExchangeTradeState(),
+                            _state.getEndExchangeTradeState(),
+                            _state.getStatExchangeWithdrawState(),
+                            _state.getExchangeData()
                     );
-                    System.out.println("usdtAmount "+usdtAmount);
-                    System.out.println("RoundToMinQty Bi  "+RoundToMinQty.roundToMinQty(
-                            usdtAmount,
-                            state().getCurrentCoin(),
-                            state().getStatExchange()
-                    ).divide(currentCoin.getPrice(), RoundingMode.HALF_EVEN));
-                    if (tradeId != null) {
-                        _state = _state.copy(
-                                _state.getCurrentCoin(),
-                                _state.getEndCoin(),
-                                _state.getCurrentBlockchain(),
-                                _state.getStatExchange(),
-                                _state.getEndExchange(),
-                                String.valueOf(tradeId.getId()),
-                                _state.getEndExchangeTradeId(),
-                                _state.getStatExchangeWithdrawId(),
-                                _state.getStatExchangeTradeState(),
-                                _state.getEndExchangeTradeState(),
-                                _state.getStatExchangeWithdrawState(),
-                                _state.getExchangeData()
-                        );
-                    }
+                }
+            }
+            case LUNO -> {
+                PostMarketOrderDto tradeId = LunoRepository.Buy(
+                        state().getCurrentCoin(),
+                        RoundToMinQty.roundToMinQty(
+                                usdtAmount.subtract(new BigDecimal("1")),
+                                state().getCurrentCoin(),
+                                state().getStatExchange()
+                        ).divide(currentCoin.getPrice(), RoundingMode.HALF_EVEN)
+                );
+                System.out.println("usdtAmount " + usdtAmount);
+                System.out.println("RoundToMinQty Bi  " + RoundToMinQty.roundToMinQty(
+                        usdtAmount,
+                        state().getCurrentCoin(),
+                        state().getStatExchange()
+                ).divide(currentCoin.getPrice(), RoundingMode.HALF_EVEN));
+                if (tradeId != null) {
+                    _state = _state.copy(
+                            _state.getCurrentCoin(),
+                            _state.getEndCoin(),
+                            _state.getTradeAmount(),
+                            _state.getCurrentBlockchain(),
+                            _state.getStatExchange(),
+                            _state.getEndExchange(),
+                            tradeId.getOrder_id(),
+                            _state.getEndExchangeTradeId(),
+                            _state.getStatExchangeWithdrawId(),
+                            _state.getStatExchangeTradeState(),
+                            _state.getEndExchangeTradeState(),
+                            _state.getStatExchangeWithdrawState(),
+                            _state.getExchangeData()
+                    );
                 }
             }
         }
@@ -493,6 +551,7 @@ public class MainViewModel {
                                     _state = _state.copy(
                                             _state.getCurrentCoin(),
                                             _state.getEndCoin(),
+                                            _state.getTradeAmount(),
                                             _state.getCurrentBlockchain(),
                                             _state.getStatExchange(),
                                             _state.getEndExchange(),
@@ -558,11 +617,35 @@ public class MainViewModel {
                                     _state = _state.copy(
                                             _state.getCurrentCoin(),
                                             _state.getEndCoin(),
+                                            _state.getTradeAmount(),
                                             _state.getCurrentBlockchain(),
                                             _state.getStatExchange(),
                                             _state.getEndExchange(),
                                             _state.getStatExchangeTradeId(),
                                             tradeId.getId(),
+                                            _state.getStatExchangeWithdrawId(),
+                                            _state.getStatExchangeTradeState(),
+                                            _state.getEndExchangeTradeState(),
+                                            _state.getStatExchangeWithdrawState(),
+                                            _state.getExchangeData()
+                                    );
+                                }
+                            }
+                            case LUNO -> {
+                                PostMarketOrderDto tradeId =  LunoRepository.Sell(
+                                        state().getEndCoin(),
+                                        sellAmount
+                                );
+                                if (tradeId != null) {
+                                    _state = _state.copy(
+                                            _state.getCurrentCoin(),
+                                            _state.getEndCoin(),
+                                            _state.getTradeAmount(),
+                                            _state.getCurrentBlockchain(),
+                                            _state.getStatExchange(),
+                                            _state.getEndExchange(),
+                                            _state.getStatExchangeTradeId(),
+                                            tradeId.getOrder_id(),
                                             _state.getStatExchangeWithdrawId(),
                                             _state.getStatExchangeTradeState(),
                                             _state.getEndExchangeTradeState(),
