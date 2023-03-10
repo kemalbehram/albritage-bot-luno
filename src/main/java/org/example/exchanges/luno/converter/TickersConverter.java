@@ -16,7 +16,7 @@ public class TickersConverter {
                     new TickerModel(
                             ticker.getPair(),
                             Double.parseDouble(ticker.getRolling_24_hour_volume()),
-                            new BigDecimal(ticker.getBid())
+                            new BigDecimal(ticker.getAsk())
                     )
             );
         }

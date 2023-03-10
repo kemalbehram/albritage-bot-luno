@@ -1,6 +1,7 @@
 package org.example.exchanges.luno.converter;
 
-import org.example.exchanges.luno.dto.GetBalanceDto;
+import org.example.exchanges.luno.dto.getBalance.Balance;
+import org.example.exchanges.luno.dto.getBalance.GetBalanceDto;
 import org.example.exchanges.luno.model.BalanceModel;
 
 import java.math.BigDecimal;
@@ -10,12 +11,12 @@ public class BalancesConverter {
     public static LinkedHashMap<String, BalanceModel> balanceConverter(GetBalanceDto dto) {
         LinkedHashMap<String, BalanceModel> output = new LinkedHashMap<>();
 
-        for(GetBalanceDto.Balance balance : dto.getBalance()) {
+        for(Balance balance : dto.balance) {
             output.put(
-                    balance.getAsset(),
+                    balance.asset,
                     new BalanceModel(
-                            balance.getAsset(),
-                            new BigDecimal(balance.getBalance())
+                            balance.asset,
+                            new BigDecimal(balance.balance)
                     )
             );
         }

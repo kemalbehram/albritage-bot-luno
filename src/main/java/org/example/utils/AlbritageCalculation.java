@@ -30,9 +30,12 @@ public class AlbritageCalculation {
             BigDecimal avaibleAmount = MainViewModel.getCoinQty(
                     state().getEndExchange(),
                     endCoin,
-                    minusProcentage(calculateDifference(tradeAmount,startCoin,endCoin,startBlockchain), endCoin.getPrice()),
+                    endCoin.getPrice().divide(new BigDecimal("1.1"), RoundingMode.HALF_EVEN),
                     OrderSide.BUY
             ).multiply(endCoin.getPrice());
+
+            myLog.info("BI price : "+ startCoin.getPrice().toString());
+            myLog.info("LUNO price : "+ endCoin.getPrice().toString());
 
             BigDecimal newTradeAmount = (avaibleAmount.compareTo(tradeAmount) > 0) ? tradeAmount : avaibleAmount;
             MainViewModel.setTradeAmount(newTradeAmount);

@@ -5,6 +5,8 @@ import org.example.domain.models.MainStateModel;
 import org.example.exchanges.luno.LunoApi;
 import org.example.exchanges.luno.converter.*;
 import org.example.exchanges.luno.dto.*;
+import org.example.exchanges.luno.dto.getBalance.GetBalanceDto;
+import org.example.exchanges.luno.dto.getMarketsInfo.GetMarketsInfoDto;
 import org.example.exchanges.luno.model.*;
 
 import java.math.BigDecimal;

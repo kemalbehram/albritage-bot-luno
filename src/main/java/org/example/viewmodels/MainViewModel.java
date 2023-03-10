@@ -22,6 +22,8 @@ import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static org.example.di.Logger.ResultLogger.myLog;
+
 public class MainViewModel {
     private static MainStateModel _state = new MainStateModel("","", new BigDecimal("0.0"), new MainStateModel.ExchangeData.CoinData.Blockchain("","","",new BigDecimal("100.0"),100.0), ExchangeEnums.BINANCE,ExchangeEnums.BINANCE,"","","", ExchangeStates.FAILED,ExchangeStates.FAILED,ExchangeStates.FAILED, Map.of());
     public static MainStateModel state() {
@@ -429,13 +431,16 @@ public class MainViewModel {
 
         BigDecimal output = new BigDecimal("0");
 
-        for (MainStateModel.ExchangeData.CoinData.OrderBook.OrderBookItem orderItem : (side == OrderSide.BUY) ? orderBook.getAsks() : orderBook.getBids()) {
-            if ((side == OrderSide.BUY && orderItem.getPrice().compareTo(price) <= 0) ||
-                    (side == OrderSide.SELL && orderItem.getPrice().compareTo(price) >= 0)
-            ) {
+        myLog.info("price" + price.toString());
+        myLog.info(orderBook.getAsks().toString());
+
+        for (MainStateModel.ExchangeData.CoinData.OrderBook.OrderBookItem orderItem : (side == OrderSide.SELL) ? orderBook.getAsks() : orderBook.getBids()) {
+            if ((side == OrderSide.BUY ) ? orderItem.getPrice().compareTo(price) >= 0 : orderItem.getPrice().compareTo(price) <= 0) {
                 output = output.add(orderItem.getQty());
             }
         }
+
+        myLog.info("qty current" + output.toString());
 
         return output;
     }

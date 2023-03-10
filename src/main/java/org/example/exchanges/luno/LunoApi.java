@@ -7,6 +7,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.example.domain.enums.OrderSide;
 import org.example.exchanges.luno.dto.*;
+import org.example.exchanges.luno.dto.getBalance.GetBalanceDto;
+import org.example.exchanges.luno.dto.getMarketsInfo.GetMarketsInfoDto;
 
 import java.math.BigDecimal;
 
