@@ -10,7 +10,8 @@ import java.math.RoundingMode;
 public class RoundToMinQty {
 
     public static BigDecimal roundToMinQty(BigDecimal coinAmount, String coin, ExchangeEnums exchange) {
-        Integer filterLength = MainViewModel.state().getExchangeData()
+
+        int filterLength = MainViewModel.state().getExchangeData()
                 .get(exchange)
                 .getCoinsData().get(coin)
                 .getMinQty().toString().indexOf("1");

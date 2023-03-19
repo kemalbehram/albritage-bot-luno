@@ -27,34 +27,38 @@ public class AlbritageCalculation {
         BigDecimal sellFeesProcentage = new BigDecimal(Configure.SLIPPAGE_PROCENT+endExchange.getTakerFee());
 
         try {
-            BigDecimal avaibleAmount = MainViewModel.getCoinQty(
-                    state().getEndExchange(),
-                    endCoin,
-                    endCoin.getPrice().divide(new BigDecimal("1.1"), RoundingMode.HALF_EVEN),
-                    OrderSide.BUY
-            ).multiply(endCoin.getPrice());
+            if (endCoin.getPrice().compareTo(startCoin.getPrice()) > 0) {
+                BigDecimal avaibleAmount = MainViewModel.getCoinQty(
+                        state().getEndExchange(),
+                        endCoin,
+                        endCoin.getPrice().divide(new BigDecimal("1.1"), RoundingMode.HALF_EVEN),
+                        OrderSide.BUY
+                ).multiply(endCoin.getPrice());
 
-            myLog.info("BI price : "+ startCoin.getPrice().toString());
-            myLog.info("LUNO price : "+ endCoin.getPrice().toString());
+                myLog.info("BI price : "+ startCoin.getPrice().toString());
+                myLog.info("LUNO price : "+ endCoin.getPrice().toString());
 
-            BigDecimal newTradeAmount = (avaibleAmount.compareTo(tradeAmount) > 0) ? tradeAmount : avaibleAmount;
-            MainViewModel.setTradeAmount(newTradeAmount);
+                BigDecimal newTradeAmount = (avaibleAmount.compareTo(tradeAmount) > 0) ? tradeAmount : avaibleAmount;
+                MainViewModel.setTradeAmount(newTradeAmount);
 
-            myLog.info("tradeAmount : "+newTradeAmount.toString());
+                myLog.info("tradeAmount : "+newTradeAmount.toString());
 
-            BigDecimal buyQuantityInklFees = minusProcentage(buyFeesProcentage, newTradeAmount.divide(startCoin.getPrice(), RoundingMode.HALF_EVEN))
-                    .subtract(startBlockchain.getFee());
+                BigDecimal buyQuantityInklFees = minusProcentage(buyFeesProcentage, newTradeAmount.divide(startCoin.getPrice(), RoundingMode.HALF_EVEN))
+                        .subtract(startBlockchain.getFee());
 
-            BigDecimal sellAmountInklFees = minusProcentage(sellFeesProcentage, buyQuantityInklFees.multiply(endCoin.getPrice()));
+                BigDecimal sellAmountInklFees = minusProcentage(sellFeesProcentage, buyQuantityInklFees.multiply(endCoin.getPrice()));
 
-            if (currencyConverter(
-                    endCoin.getSymbol().split("_")[1],
-                    startCoin.getSymbol().split("_")[1],
-                    buyQuantityInklFees.multiply(endCoin.getPrice())
-            ).compareTo(new BigDecimal("0.0")) <= 0.0) {
-                return new BigDecimal("0.0");
+                if (currencyConverter(
+                        endCoin.getSymbol().split("_")[1],
+                        startCoin.getSymbol().split("_")[1],
+                        buyQuantityInklFees.multiply(endCoin.getPrice())
+                ).compareTo(new BigDecimal("0.0")) <= 0.0) {
+                    return new BigDecimal("0.0");
+                } else {
+                    return sellAmountInklFees.subtract(newTradeAmount);
+                }
             } else {
-                return sellAmountInklFees.subtract(newTradeAmount);
+                return new BigDecimal("0.0");
             }
         } catch (Exception e) {
             myLog.info(e.toString());

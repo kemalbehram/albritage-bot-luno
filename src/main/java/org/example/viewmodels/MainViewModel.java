@@ -11,6 +11,7 @@ import org.example.exchanges.binance.model.WithdrawModel;
 import org.example.exchanges.binance.repository.BinanceRepository;
 import org.example.exchanges.luno.dto.PostMarketOrderDto;
 import org.example.exchanges.luno.repository.LunoRepository;
+import org.example.local.DataStorage;
 import org.example.utils.AlbritageCalculation;
 import org.example.utils.FindUsdtAmount;
 import org.example.utils.RoundToMinQty;
@@ -25,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import static org.example.di.Logger.ResultLogger.myLog;
 
 public class MainViewModel {
-    private static MainStateModel _state = new MainStateModel("","", new BigDecimal("0.0"), new MainStateModel.ExchangeData.CoinData.Blockchain("","","",new BigDecimal("100.0"),100.0), ExchangeEnums.BINANCE,ExchangeEnums.BINANCE,"","","", ExchangeStates.FAILED,ExchangeStates.FAILED,ExchangeStates.FAILED, Map.of());
+    private static MainStateModel _state = DataStorage.getMainState();
     public static MainStateModel state() {
         return _state;
     }
@@ -435,7 +436,7 @@ public class MainViewModel {
         myLog.info(orderBook.getAsks().toString());
 
         for (MainStateModel.ExchangeData.CoinData.OrderBook.OrderBookItem orderItem : (side == OrderSide.SELL) ? orderBook.getAsks() : orderBook.getBids()) {
-            if ((side == OrderSide.BUY ) ? orderItem.getPrice().compareTo(price) >= 0 : orderItem.getPrice().compareTo(price) <= 0) {
+            if (orderItem.getPrice().compareTo(price) >= 0) {
                 output = output.add(orderItem.getQty());
             }
         }
