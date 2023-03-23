@@ -638,9 +638,10 @@ public class MainViewModel {
                                 }
                             }
                             case LUNO -> {
-                                PostMarketOrderDto tradeId =  LunoRepository.Sell(
+                                PostMarketOrderDto tradeId =  LunoRepository.LimitSell(
                                         state().getEndCoin(),
-                                        sellAmount
+                                        sellAmount,
+                                        currentCoin.getOrderBook().getBids().get(0).getPrice()
                                 );
                                 if (tradeId != null) {
                                     _state = _state.copy(
