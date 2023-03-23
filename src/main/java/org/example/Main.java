@@ -6,6 +6,7 @@ import org.example.domain.enums.ExchangeEnums;
 import org.example.domain.models.MainStateModel;
 import org.example.exchanges.binance.model.WithdrawFeeModel;
 import org.example.exchanges.binance.repository.BinanceRepository;
+import org.example.exchanges.luno.repository.LunoRepository;
 import org.example.local.DataStorage;
 import org.example.utils.RoundToMinQty;
 import org.example.viewmodels.MainViewModel;
@@ -24,7 +25,11 @@ import static org.example.viewmodels.MainViewModel.state;
 public class Main {
 
     public static void main(String[] args) {
+        System.out.println(LunoRepository.Balances().get("ADA"));
+        LunoRepository.LimitSell("ADAEUR", new BigDecimal("1"), new BigDecimal("0.2915"));
         MainViewModel.initialCoinData();
+        //https://api.luno.com/api/1/postorder?pair=ADAEUR&type=ASK&volume=10&price=0.2915
+        //https://api.luno.com/api/1/postorder?pair=ADAEUR&price=0.2915&type=ASK&volume=1
 
         List<MainStateModel.ExchangeData.CoinData> startCoinList = MainViewModel.generateStartCoinList();
         Map<ExchangeEnums, MainStateModel.ExchangeData> endCoinList = MainViewModel.generateEndCoinList();

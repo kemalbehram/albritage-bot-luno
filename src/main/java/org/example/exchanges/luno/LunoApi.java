@@ -272,4 +272,29 @@ public class LunoApi {
             return null;
         }
     }
+
+    public static PostMarketOrderDto PostLimitOrder(
+            String Pair,
+            String side,
+            BigDecimal amount,
+            BigDecimal price
+    ) {
+        try {
+            System.out.println("URL | " + BASE_URL+"/1/postorder?pair="+Pair+"&price="+price+"&type="+side+"&volume="+amount);
+            Response response = okHttpClient.newCall(
+                    auth.url(BASE_URL+"/1/postorder?pair="+Pair+"&price="+price+"&type="+side+"&volume="+amount)
+                            .post(RequestBody.create(MediaType.parse("application/json"), ""))
+                            .build()
+            ).execute();
+            String responseBody = response.body().string();
+            if (response.code() <= 201) {
+                return new Gson().fromJson(responseBody, PostMarketOrderDto.class);
+            }
+            System.out.println(responseBody);
+            return null;
+        } catch (Exception e) {
+            System.out.println(e);
+            return null;
+        }
+    }
 }

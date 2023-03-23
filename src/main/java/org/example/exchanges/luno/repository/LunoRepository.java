@@ -156,4 +156,17 @@ public class LunoRepository {
             return null;
         }
     }
+
+    public static PostMarketOrderDto LimitSell(
+            String symbol,
+            BigDecimal amount,
+            BigDecimal price
+    ) {
+        PostMarketOrderDto postMarketOrderDto = LunoApi.PostLimitOrder(symbol,"ASK", amount, price);
+        if (postMarketOrderDto != null) {
+            return postMarketOrderDto;
+        } else {
+            return null;
+        }
+    }
 }
